@@ -7,7 +7,7 @@ int keyCounter = 0;  //счётчик кол-ва нажатия в ISR
  
  bool isKeyPres()
 {
-return PINB > 0b00001111;
+return ((~PINB) > 0b00001111);
 } 
 
 
