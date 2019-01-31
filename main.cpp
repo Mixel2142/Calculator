@@ -1,6 +1,7 @@
+#define F_CPU 8000000
 #include <avr/io.h>
 #include <avr/interrupt.h>
-
+#include <avr/delay.h>
 
 #define On_C 0b00011000
 #define Plus 0b00010001
@@ -48,10 +49,20 @@ int32_t from  -2'147'483'648 to 2'147'483'647
 #define i 0b00000100
 #define n 0b01010100
 #define f 0b01110001
+#define p 0b01110011
 #define e 0b01111001
+#define q 0b01100111
+#define u 0b00111110
+#define m 0b00110111
+#define l 0b00111000
+#define d 0b01011110
+#define s 0b01101101
+#define b 0b01111100
 #define minus 0b01000000
 
 #define startPositionPortB 0b00001000
+
+#define delaySign 300
 
 uint8_t dispVal[4] = {Nun,Nun,Nun,0b00111111};
 
@@ -291,12 +302,12 @@ int main()
 
 	DDRD  = 0b11111111;// порты D 0-7  в режиме вывода (для дисплея)
 	PORTD = 0b00000000;
-	DDRB  = 0b11111111;// порты B 0-3 в режиме вывода|порты B 4-7 в режиме ввода(для клавы) 
-	/*
-	не корректно работает с значением 0b00001111; Но по идее должно работать так.
-	*/
+	DDRB  = 0b00001111;// порты B 0-3 в режиме вывода|порты B 4-7 в режиме ввода(для клавы) 
 	PORTB = startPositionPortB;
+	/*
+	Если нажать любую кнопку из первой колонки, то перестают работать
 
+	*/
 	uint8_t sign = Nun; // запоминает нужное действие (+-=:*)
 		
 	key_disp_timer_init();
@@ -331,25 +342,50 @@ int main()
 					case Plus:
 						writeTo = !writeTo;
 						sign = Plus;
+						dispVal[0] = p;
+						dispVal[1] = l;
+						dispVal[2] = u;
+						dispVal[3] = s;
+						_delay_ms(delaySign);
 						break;
 
 					case Sub:
 						writeTo = !writeTo;
 						sign = Sub;
+						dispVal[0] = Nun;
+						dispVal[1] = s;
+						dispVal[2] = u;
+						dispVal[3] = b;
+						_delay_ms(delaySign);
 						break;
 
 					case Did:
 						writeTo = !writeTo;
 						sign = Did;
+						dispVal[0] = Nun;
+						dispVal[1] = d;
+						dispVal[2] = i;
+						dispVal[3] = d;
+						_delay_ms(delaySign);
 						break;
 
 					case Mul:
 						writeTo = !writeTo;
 						sign = Mul;
+						dispVal[0] = m;
+						dispVal[1] = m;
+						dispVal[2] = u;
+						dispVal[3] = l;
+						_delay_ms(delaySign);
 						break;
 
 					case Equ:
 						writeTo = NumOne;
+						dispVal[0] = Nun;
+						dispVal[1] = e;
+						dispVal[2] = q;
+						dispVal[3] = u;
+						_delay_ms(delaySign);
 						switch (sign)
 						{
 						case Plus:
