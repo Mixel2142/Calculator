@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/delay.h>
+#include <avr/sleep.h>
 
 #define On_C 0b00011000
 #define Plus 0b00010001
@@ -92,16 +93,6 @@ inline bool isKeyPres()
 bool isKeyPres(uint8_t key)
 {
 	return (PINB == key);
-}
-
-void key_disp_timer_init()
-{
-	TCCR0A  = _BV(WGM01);	//включили CTC
-	TCCR0B |= _BV(CS00);
-	TCCR0B |= _BV(CS02);	// Установил делитель на 1024 // 8 MHz / 1024 = 7'812Hz
-	OCR0A   = 80;   		// Установил делитель на 32 // 8 MHz / 32 = 244Hz ~ 60 меганий на 1 секцию диодов
-	TIMSK0  = _BV(OCIE0A);	// Включил работу с TCCR0B
-	sei();					// разрешил прерывания
 }
 
 uint8_t setPortD(uint8_t num)
@@ -248,6 +239,12 @@ void makeDisplayValue()
 	}
 }
 
+ISR(PCINT0_vect)// wake up
+{
+
+
+}
+
 ISR(TIMER0_COMPA_vect)//Прерывание по сравнению, канал A таймера/счетчика 0 КЛАВИАТУРА
 {
 	if(power)
@@ -296,18 +293,30 @@ ISR(TIMER0_COMPA_vect)//Прерывание по сравнению, канал
 	}
 }
 
+void key_disp_timer_init()
+{
+	TCCR0A  = _BV(WGM01);	//включили CTC
+	TCCR0B |= _BV(CS00);
+	TCCR0B |= _BV(CS02);	// Установил делитель на 1024 // 8 MHz / 1024 = 7'812Hz
+	OCR0A   = 80;   		// Установил делитель на 32 // 8 MHz / 32 = 244Hz ~ 60 меганий на 1 секцию диодов
+	TIMSK0  = _BV(OCIE0A);	// Включил работу с TCCR0B
+	sei();					// разрешил прерывания
+}
 
 int main()
 {
-
+	/*
+	ADCSRA &= ~_BV(ADEN); // Отключаем АЦП
+	MCUCR = _BV(BODS) | _BV(BODSE);// Отключаем детектор пониженного напряжения питания
+	*/
 	DDRD  = 0b11111111;// порты D 0-7  в режиме вывода (для дисплея)
 	PORTD = 0b00000000;
-	DDRB  = 0b00001111;// порты B 0-3 в режиме вывода|порты B 4-7 в режиме ввода(для клавы) 
+	DDRB  = 0b11111111;// порты B 0-3 в режиме вывода|порты B 4-7 в режиме ввода(для клавы) 
 	PORTB = startPositionPortB;
-	/*
-	Если нажать любую кнопку из первой колонки, то перестают работать
-
-	*/
+	//set_sleep_mode(SLEEP_MODE_PWR_DOWN); //Устанавливаем интересующий нас режим
+	//sleep_mode(); // Переводим МК в спящий режим
+	
+	
 	uint8_t sign = Nun; // запоминает нужное действие (+-=:*)
 		
 	key_disp_timer_init();
