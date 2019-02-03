@@ -232,9 +232,20 @@ void makeDisplayValue()
 	}
 	else//NumTwo
 	{
-		for(uint8_t j = 0; j < getLength(numberTwo); j++)
+		if(getLength(numberTwo) < 4)
 		{
-			dispVal[3-j] = setPortD(numberTwo/pow_dec(10,j)%10);
+			for(uint8_t j = 0; j < getLength(numberTwo); j++)
+			{
+				dispVal[3-j] = setPortD(mod(numberTwo/pow_dec(10,j)%10));
+			}
+			dispVal[3-getLength(numberTwo)] = minus;
+		}
+		else
+		{
+			dispVal[3] = setPortD(getLength(numberTwo)-1);
+			dispVal[2] = e;
+			dispVal[1] = setPortD(mod(numberTwo/pow_dec(10,getLength(numberTwo)-1)%10));
+			dispVal[0] = minus;
 		}
 	}
 }
