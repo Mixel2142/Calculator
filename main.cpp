@@ -40,12 +40,12 @@ int32_t numberTwo = 0;
 /*
 int32_t from  -2'147'483'648 to 2'147'483'647
 */
-#define firstSegment		0b00000001
-#define secondSegment		0b00000010
-#define thirdSegment		0b00000100
-#define fourthSegment		0b00001000
-#define go2PreviusSegment	PORTB = PORTB >> 1 
-#define currentSegment		PORTB
+#define firstZnakoMesto		0b00000001
+#define secondZnakoMesto		0b00000010
+#define thirdZnakoMesto		0b00000100
+#define fourthZnakoMesto		0b00001000
+#define go2PreviusZnakoMesto	PORTB = PORTB >> 1 
+#define currentZnakoMesto		PORTB
 
 #define i 0b00000100
 #define n 0b01010100
@@ -138,19 +138,19 @@ void drawDigits()
 {
 	switch (PORTB)
 	{
-		case fourthSegment:
+		case fourthZnakoMesto:
 			PORTD = dispVal[0];
 			break;
 
-		case thirdSegment:
+		case thirdZnakoMesto:
 			PORTD = dispVal[1];
 			break;
 
-		case secondSegment:
+		case secondZnakoMesto:
 			PORTD = dispVal[2];
 			break;
 
-		case firstSegment:
+		case firstZnakoMesto:
 			PORTD = dispVal[3];
 			break;
 
@@ -232,20 +232,9 @@ void makeDisplayValue()
 	}
 	else//NumTwo
 	{
-		if(getLength(numberTwo) < 4)
+		for(uint8_t j = 0; j < getLength(numberTwo); j++)
 		{
-			for(uint8_t j = 0; j < getLength(numberTwo); j++)
-			{
-				dispVal[3-j] = setPortD(mod(numberTwo/pow_dec(10,j)%10));
-			}
-			dispVal[3-getLength(numberTwo)] = minus;
-		}
-		else
-		{
-			dispVal[3] = setPortD(getLength(numberTwo)-1);
-			dispVal[2] = e;
-			dispVal[1] = setPortD(mod(numberTwo/pow_dec(10,getLength(numberTwo)-1)%10));
-			dispVal[0] = minus;
+			dispVal[3-j] = setPortD(numberTwo/pow_dec(10,j)%10);
 		}
 	}
 }
@@ -260,8 +249,8 @@ ISR(TIMER0_COMPA_vect)//Прерывание по сравнению, канал
 {
 	if(power)
 	{	
-		go2PreviusSegment;
-		if(currentSegment < firstSegment) currentSegment = fourthSegment;
+		go2PreviusZnakoMesto;
+		if(currentZnakoMesto < firstZnakoMesto) currentZnakoMesto = fourthZnakoMesto; // поочередное открывание ключей
 		
 		drawDigits();
 		
@@ -316,17 +305,15 @@ void key_disp_timer_init()
 
 int main()
 {
-	/*
 	ADCSRA &= ~_BV(ADEN); // Отключаем АЦП
-	MCUCR = _BV(BODS) | _BV(BODSE);// Отключаем детектор пониженного напряжения питания
-	*/
+	//MCUCR = _BV(BODS) | _BV(BODSE);// Отключаем детектор пониженного напряжения питания
+
 	DDRD  = 0b11111111;// порты D 0-7  в режиме вывода (для дисплея)
 	PORTD = 0b00000000;
 	DDRB  = 0b11111111;// порты B 0-3 в режиме вывода|порты B 4-7 в режиме ввода(для клавы) 
 	PORTB = startPositionPortB;
 	//set_sleep_mode(SLEEP_MODE_PWR_DOWN); //Устанавливаем интересующий нас режим
 	//sleep_mode(); // Переводим МК в спящий режим
-	
 	
 	uint8_t sign = Nun; // запоминает нужное действие (+-=:*)
 		
@@ -347,6 +334,7 @@ int main()
 							numberTwo = 0;
 							numberOne = 0;
 							writeTo = NumOne;
+							sign = Nun;
 						}
 						
 						if(writeTo)//NumOne
@@ -550,8 +538,25 @@ int main()
 					default:
 						break;
 				}
+				
 				pressKey = Nun;
+				if(numberTwo > 9999)numberTwo %= 10000;
 				makeDisplayValue();
+				if(numberOne > 9999)
+				{
+					if(sign == Equ)
+					{
+						makeDisplayValue();
+						numberOne = 0;
+					}
+					else
+					{
+						numberOne %= 10000;
+						makeDisplayValue();
+					}
+				}
+				
+
 			}//if pressKey
 		}
 		else
