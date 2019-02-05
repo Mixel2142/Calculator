@@ -4,34 +4,34 @@
 #include <avr/delay.h>
 #include <avr/sleep.h>
 
-#define On_C 0b00011000
-#define Plus 0b00010001
-#define Sub  0b00100001
-#define Did  0b10000001
-#define Mul  0b01000001
-#define Equ  0b00010010
-#define k0	 0b00010100
-#define k1   0b00101000
-#define k2 	 0b00100100
-#define k3 	 0b00100010
-#define k4 	 0b01001000
-#define k5 	 0b01000100
-#define k6 	 0b01000010
-#define k7   0b10001000
-#define k8   0b10000100
-#define k9   0b10000010
-#define Nun  0b00000000
+const uint8_t On_C = 0b00011000;
+const uint8_t Plus = 0b00010001;
+const uint8_t Sub  = 0b00100001;
+const uint8_t Did  = 0b10000001;
+const uint8_t Mul  = 0b01000001;
+const uint8_t Equ  = 0b00010010;
+const uint8_t k0   = 0b00010100;
+const uint8_t k1   = 0b00101000;
+const uint8_t k2   = 0b00100100;
+const uint8_t k3   = 0b00100010;
+const uint8_t k4   = 0b01001000;
+const uint8_t k5   = 0b01000100;
+const uint8_t k6   = 0b01000010;
+const uint8_t k7   = 0b10001000;
+const uint8_t k8   = 0b10000100;
+const uint8_t k9   = 0b10000010;
+const uint8_t Nun  = 0b00000000;
 
 uint8_t pressKey = Nun; //ничего не нажато
-uint8_t keyDelay = 2;//60;   //кол-во итераций в ISR которое нужно для срабатывания нажатия клавиши
+const uint8_t keyDelay = 2;//60;   //кол-во итераций в ISR которое нужно для срабатывания нажатия клавиши
 uint8_t keyCounter = 0;  //счётчик кол-ва нажатия в ISR
 
 uint16_t powerCounter = 0;
-uint16_t powerStop = 10000;//244*120;// 2минуты
+const uint16_t powerStop = 10000;//244*120;// 2минуты
 bool power = false;
 
-#define NumOne true
-#define NumTwo false
+const bool NumOne = true;
+const bool NumTwo = false;
 bool writeTo = NumOne;
 
 bool inf = false;
@@ -40,30 +40,32 @@ int32_t numberTwo = 0;
 /*
 int32_t from  -2'147'483'648 to 2'147'483'647
 */
-#define firstZnakoMesto		0b00000001
-#define secondZnakoMesto		0b00000010
-#define thirdZnakoMesto		0b00000100
-#define fourthZnakoMesto		0b00001000
-#define go2PreviusZnakoMesto	PORTB = PORTB >> 1 
-#define currentZnakoMesto		PORTB
+const uint8_t firstZnakoMesto	= 0b00000001;
+const uint8_t secondZnakoMesto	= 0b00000010;
+const uint8_t thirdZnakoMesto	= 0b00000100;
+const uint8_t fourthZnakoMesto	= 0b00001000;
 
-#define i 0b00000100
-#define n 0b01010100
-#define f 0b01110001
-#define p 0b01110011
-#define e 0b01111001
-#define q 0b01100111
-#define u 0b00111110
-#define m 0b00110111
-#define l 0b00111000
-#define d 0b01011110
-#define s 0b01101101
-#define b 0b01111100
-#define minus 0b01000000
+inline void go2PreviusZnakoMesto(){	PORTB = PORTB >> 1;} 
 
-#define startPositionPortB 0b00001000
+#define currentZnakoMesto PORTB
 
-#define delaySign 300
+const uint8_t i = 0b00000100;
+const uint8_t n = 0b01010100;
+const uint8_t f = 0b01110001;
+const uint8_t p = 0b01110011;
+const uint8_t e = 0b01111001;
+const uint8_t q = 0b01100111;
+const uint8_t u = 0b00111110;
+const uint8_t m = 0b00110111;
+const uint8_t l = 0b00111000;
+const uint8_t d = 0b01011110;
+const uint8_t s = 0b01101101;
+const uint8_t b = 0b01111100;
+const uint8_t minus = 0b01000000;
+
+const uint8_t startPositionPortB = 0b00001000;
+
+const uint8_t delaySign = 250;
 
 uint8_t dispVal[4] = {Nun,Nun,Nun,0b00111111};
 
@@ -249,7 +251,7 @@ ISR(TIMER0_COMPA_vect)//Прерывание по сравнению, канал
 {
 	if(power)
 	{	
-		go2PreviusZnakoMesto;
+		go2PreviusZnakoMesto();
 		if(currentZnakoMesto < firstZnakoMesto) currentZnakoMesto = fourthZnakoMesto; // поочередное открывание ключей
 		
 		drawDigits();
